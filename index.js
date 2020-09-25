@@ -3,7 +3,8 @@ var semver = require('semver'),
   through = require('through2'),
   fs = require('vinyl-fs'),
   fUtil = require('./lib/files'),
-  git = require('./lib/git');
+  git = require('./lib/git'),
+  chalk = require('chalk');
 
 exports.get = function(callback) {
   var result = fUtil.loadFiles();
@@ -65,6 +66,8 @@ var updateJSON = (exports.updateJSON = function(obj, ver) {
 });
 
 exports.update = function(options, callback) {
+  var logger = console.log.bind(console);
+  
   if (typeof options === 'function') {
     callback = options;
     options = {};
@@ -83,6 +86,14 @@ exports.update = function(options, callback) {
 
   if (!options.tagName) {
     options.tagName = (options.noPrefix ? '' : 'v') + '%s';
+  }
+
+  if (!options.files) {
+    options.files = fUtil.files;
+  }
+
+  if (!options.output) {
+    options.output = './';
   }
 
   var ver = options.version || 'minor';
@@ -104,7 +115,7 @@ exports.update = function(options, callback) {
 
     var files = [],
       errors = [],
-      fileStream = fUtil.loadFiles(),
+      fileStream = fUtil.loadInputFiles(options.files),
       versionList = {},
       updated = null,
       hasSet = false;
@@ -157,7 +168,7 @@ exports.update = function(options, callback) {
       .on('error', function(err) {
         callback(err);
       })
-      .pipe(fs.dest('./'));
+      .pipe(fs.dest(options.output));
 
     stored.on('data', function(file) {
       files.push(file.path);

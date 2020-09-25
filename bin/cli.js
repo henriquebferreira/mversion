@@ -23,10 +23,11 @@ module.exports = function (argv, loggers, processCallback) {
   processCallback = processCallback || function () { };
 
   var parsedArguments = require('minimist')(argv, {
-    'string': ['t', 'tag'],
+    'string': ['t', 'tag', 'f', 'file', 'o', 'out'],
     'boolean': ['n']
   });
 
+  
   if (argv.length === 0) {
     return get();
   }
@@ -77,6 +78,16 @@ module.exports = function (argv, loggers, processCallback) {
     // Check for overriding tag name
     if (isArgumentPassed('t', 'tag')) {
       updateOptions.tagName = parsedArguments.t || parsedArguments.tag;
+    }
+
+    // Check for overriding file name
+    if (isArgumentPassed('f', 'file')) {
+      updateOptions.files = parsedArguments.f || parsedArguments.file;
+    }
+
+    // Check for overriding output folder
+    if (isArgumentPassed('o', 'out')) {
+      updateOptions.output = parsedArguments.o || parsedArguments.out;
     }
 
     if (updateOptions.commitMessage && rc.scripts && rc.scripts.precommit) {
